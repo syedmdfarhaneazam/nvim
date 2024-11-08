@@ -1,31 +1,19 @@
 return {
-  "windwp/nvim-autopairs",
-  event = { "InsertEnter" },
+  "numToStr/Comment.nvim",
+  event = { "BufReadPre", "BufNewFile" },
   dependencies = {
-    "hrsh7th/nvim-cmp",
+    "JoosepAlviste/nvim-ts-context-commentstring",
   },
   config = function()
-    -- import nvim-autopairs
-    local autopairs = require("nvim-autopairs")
+    -- import comment plugin safely
+    local comment = require("Comment")
 
-    -- configure autopairs
-    autopairs.setup({
-      check_ts = true, -- enable treesitter
-      ts_config = {
-        lua = { "string" }, -- don't add pairs in lua string treesitter nodes
-        javascript = { "template_string" }, -- don't add pairs in javscript template_string treesitter nodes
-        java = false, -- don't check treesitter on java
-      },
+    local ts_context_commentstring = require("ts_context_commentstring.integrations.comment_nvim")
+
+    -- enable comment
+    comment.setup({
+      -- for commenting tsx, jsx, svelte, html files
+      pre_hook = ts_context_commentstring.create_pre_hook(),
     })
-
-    -- import nvim-autopairs completion functionality
-    local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-
-    -- import nvim-cmp plugin (completions plugin)
-    local cmp = require("cmp")
-
-    -- make autopairs and completion work together
-    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
   end,
 }
-
