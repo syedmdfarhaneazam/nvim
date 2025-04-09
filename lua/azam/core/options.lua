@@ -36,9 +36,9 @@ opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or 
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 vim.o.clipboard = "unnamedplus"
 -- split windows
-opt.splitright = true -- split vertical window to the right
-opt.splitbelow = true -- split horizontal window to the bottom
-
+opt.splitright = true    -- split vertical window to the right
+opt.splitbelow = true    -- split horizontal window to the bottom
+vim.opt.updatetime = 250 -- default is 4000ms, so this is much faster
 -- turn off swapfile
 opt.swapfile = false
 opt.swapfile = false
