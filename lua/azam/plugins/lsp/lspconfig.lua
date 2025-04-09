@@ -4,7 +4,7 @@ return {
   dependencies = {
     "hrsh7th/cmp-nvim-lsp",
     { "antosha417/nvim-lsp-file-operations", config = true },
-    { "folke/neodev.nvim", opts = {} },
+    { "folke/neodev.nvim",                   opts = {} },
   },
   config = function()
     -- import lspconfig plugin
@@ -68,7 +68,10 @@ return {
     })
 
     -- used to enable autocompletion (assign to every lsp server config)
-    local capabilities = cmp_nvim_lsp.default_capabilities()
+    local capabilities = require('cmp_nvim_lsp').default_capabilities()
+    require('lspconfig')['ts_ls'].setup({
+      capabilities = capabilities,
+    })
 
     -- Change the Diagnostic symbols in the sign column (gutter)
     -- (not in youtube nvim video)
