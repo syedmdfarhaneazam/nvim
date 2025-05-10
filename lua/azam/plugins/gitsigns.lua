@@ -2,6 +2,20 @@ return {
   "lewis6991/gitsigns.nvim",
   event = { "BufReadPre", "BufNewFile" },
   opts = {
+    -- Enables virtual text blame for the current line
+    current_line_blame = true,
+
+    -- Options for how the blame text should appear
+    current_line_blame_opts = {
+      delay = 100,               -- Delay in milliseconds before blame text appears
+      virt_text = true,          -- Display blame info as virtual text (inline)
+      virt_text_pos = 'eol',     -- Position the text at the end of the line ('eol' = end of line)
+      ignore_whitespace = false, -- Don't ignore whitespace when determining blame
+    },
+
+    -- Format of the blame text shown
+    current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+    -- Shows: Author name, date, and short commit message
     on_attach = function(bufnr)
       local gs = package.loaded.gitsigns
 
