@@ -6,8 +6,8 @@ opt.relativenumber = true -- show relative line numbers
 opt.number = true         -- shows absolute line number on cursor line (when relative number is on)
 
 -- tabs & indentation
-opt.tabstop = 4       -- 2 spaces for tabs (prettier default)
-opt.shiftwidth = 4    -- 2 spaces for indent width
+opt.tabstop = 2       -- 2 spaces for tabs (prettier default)
+opt.shiftwidth = 2    -- 2 spaces for indent width
 opt.expandtab = true  -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
 
@@ -42,3 +42,5 @@ vim.opt.updatetime = 250 -- default is 4000ms, so this is much faster
 -- turn off swapfile
 opt.swapfile = false
 opt.swapfile = false
+
+vim.g.python3_host_prog = "~/.venv/nvim-tools/bin/python"
