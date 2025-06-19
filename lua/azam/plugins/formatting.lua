@@ -18,11 +18,18 @@ return {
         markdown = { "prettier" },
         graphql = { "prettier" },
         liquid = { "prettier" },
+        python = { "isort", "black" },
       },
       format_on_save = {
         lsp_fallback = true,
         async = false,
         timeout_ms = 1000,
+      },
+      formatters = {
+        prettier = {
+          prepend_args = { "--tab-width", "2", "--use-tabs", "false" },
+        },
+
       },
     })
 
@@ -30,7 +37,7 @@ return {
       conform.format({
         lsp_fallback = true,
         async = false,
-        timeout_ms = 1000,
+        timeout_ms = 500,
       })
     end, { desc = "Format file or range (in visual mode)" })
   end,
