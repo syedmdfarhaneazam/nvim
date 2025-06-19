@@ -6,8 +6,7 @@ return {
         { "antosha417/nvim-lsp-file-operations", config = true },
         { "folke/neodev.nvim", opts = {} },
         "williamboman/mason.nvim",
-        {"williamboman/mason-lspconfig.nvim",
-    version="1.*"},
+        "williamboman/mason-lspconfig.nvim",
     },
     config = function()
         local lspconfig = require("lspconfig")
