@@ -1,25 +1,31 @@
-return {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
-    init = function()
-        vim.o.timeout = true
-        vim.o.timeoutlen = 500 -- Keep as 500ms for responsiveness
-    end,
-    opts = {
-        plugins = {
-            spelling = { enabled = true },
-        },
-        window = {
-            border = "single",
-        },
+return
+{
+  "folke/which-key.nvim",
+  event = "VeryLazy",
+  init = function()
+    vim.o.timeout = true
+    vim.o.timeoutlen = 500
+  end,
+  opts = {
+    plugins = {
+      spelling = { enabled = true }, -- keep spelling suggestions
     },
-    config = function()
-        local wk = require("which-key")
-        -- Register prefixes
-        wk.register({
-            { "<leader>d", group = "debug" },
-            { "<leader>m", group = "repl", noremap = true, silent = true }, -- Changed to <leader>m
-        })
-        vim.keymap.set("n", "<leader>m", "<Nop>", { noremap = true, silent = true })
-    end,
+    window = {
+      border = "single",
+    },
+    -- you can adjust layout, icons, presets, etc.
+  },
+  config = function(_, opts)
+    local wk = require("which-key")
+    wk.setup(opts)
+
+    -- register your key groups and bindings
+    wk.register({
+      d = { name = "debug" }, -- <leader>d group
+      m = { name = "repl" },  -- <leader>m group
+    }, { prefix = "<leader>", mode = "n" })
+
+    -- prevent default mapping of <leader>m if you plan to use it manually
+    vim.keymap.set("n", "<leader>m", "<Nop>", { noremap = true, silent = true })
+  end,
 }

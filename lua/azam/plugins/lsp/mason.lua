@@ -1,4 +1,3 @@
-
 return {
   {
     "williamboman/mason.nvim",
@@ -10,20 +9,29 @@ return {
       },
       "WhoIsSethDaniel/mason-tool-installer.nvim",
     },
-    cmd = "Mason",        -- lazy-load only when used
+    cmd = "Mason",
     config = function()
       require("mason").setup()
       require("mason-lspconfig").setup({
         ensure_installed = {
-          "html", "cssls", "tailwindcss",
-          "lua_ls", "graphql", "pyright", "debugpy",
+          "html",
+          "cssls",
+          "tailwindcss",
+          "lua_ls",
+          "graphql",
+          "pyright",
+          "jdtls", -- Added for Java
         },
         automatic_installation = true,
-        automatic_enable = false,  -- avoid v2 API
       })
       require("mason-tool-installer").setup({
         ensure_installed = {
-          "prettier", "isort", "black", "pylint", "eslint_d"
+          "prettier",
+          "isort",
+          "black",
+          "pylint",
+          "eslint_d",
+          "debugpy", -- Ensure debugpy for Python debugging
         },
         auto_update = true,
         run_on_start = true,
@@ -31,4 +39,3 @@ return {
     end,
   },
 }
-

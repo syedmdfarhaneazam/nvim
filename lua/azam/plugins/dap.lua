@@ -59,19 +59,18 @@ return {
             vim.fn.sign_define("DapLogPoint", { text = "📝", texthl = "DapLogPoint", linehl = "", numhl = "" })
 
             -- Which-key integration
+                        -- Which-key integration
             local wk = require("which-key")
-            wk.register({
-                ["<leader>d"] = {
-                    name = "+debug",
-                    b = { dap.toggle_breakpoint, "Toggle Breakpoint" },
-                    c = { dap.continue, "Continue" },
-                    i = { dap.step_into, "Step Into" },
-                    o = { dap.step_over, "Step Over" },
-                    u = { dap.step_out, "Step Out" },
-                    r = { dapui.toggle, "Toggle DAP UI" },
-                    t = { dap.terminate, "Terminate" },
-                },
-            }, { mode = "n" })
+            wk.add({
+              { "<leader>d", group = "debug" },
+              { "<leader>db", dap.toggle_breakpoint, desc = "Toggle Breakpoint" },
+              { "<leader>dc", dap.continue, desc = "Continue" },
+              { "<leader>di", dap.step_into, desc = "Step Into" },
+              { "<leader>do", dap.step_over, desc = "Step Over" },
+              { "<leader>du", dap.step_out, desc = "Step Out" },
+              { "<leader>dr", dapui.toggle, desc = "Toggle DAP UI" },
+              { "<leader>dt", dap.terminate, desc = "Terminate" },
+            })
         end,
     },
 }

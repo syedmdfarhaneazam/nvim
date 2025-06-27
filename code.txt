@@ -1,0 +1,1126 @@
+<./lua/azam/lazy.lua>
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", -- latest stable release
+        lazypath,
+    })
+end
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup(
+    { { import = "azam.plugins" }, { import = "azam.plugins.lsp" }, { import = "azam.plugins.dap" }, { import = "azam.plugins.iron" }, },
+    {
+        checker = {
+            enabled = true,
+            notify = false,
+        },
+        change_detection = {
+            notify = false,
+        },
+    })
+
+<./lua/azam/plugins/auto-session.lua>
+return {
+  "rmagatti/auto-session",
+  config = function()
+    local auto_session = require("auto-session")
+
+    auto_session.setup({
+      auto_restore_enabled = false,
+      auto_session_suppress_dirs = { "~/", "~/Dev/", "~/Downloads", "~/Documents", "~/Desktop/" },
+    })
+
+    local keymap = vim.keymap
+
+    keymap.set("n", "<leader>wr", "<cmd>SessionRestore<CR>", { desc = "Restore session for cwd" }) -- restore last workspace session for current directory
+    keymap.set("n", "<leader>ws", "<cmd>SessionSave<CR>", { desc = "Save session for auto session root dir" }) -- save workspace session for current working directory
+  end,
+}
+
+<./lua/azam/plugins/which-key.lua>
+return
+{
+  "folke/which-key.nvim",
+  event = "VeryLazy",
+  init = function()
+    vim.o.timeout = true
+    vim.o.timeoutlen = 500
+  end,
+  opts = {
+    plugins = {
+      spelling = { enabled = true }, -- keep spelling suggestions
+    },
+    window = {
+      border = "single",
+    },
+    -- you can adjust layout, icons, presets, etc.
+  },
+  config = function(_, opts)
+    local wk = require("which-key")
+    wk.setup(opts)
+
+    -- register your key groups and bindings
+    wk.register({
+      d = { name = "debug" }, -- <leader>d group
+      m = { name = "repl" },  -- <leader>m group
+    }, { prefix = "<leader>", mode = "n" })
+
+    -- prevent default mapping of <leader>m if you plan to use it manually
+    vim.keymap.set("n", "<leader>m", "<Nop>", { noremap = true, silent = true })
+  end,
+}
+
+<./lua/azam/plugins/autopairs.lua>
+return {
+  "windwp/nvim-autopairs",
+  event = { "InsertEnter" },
+  dependencies = {
+    "hrsh7th/nvim-cmp",
+  },
+  config = function()
+    -- import nvim-autopairs
+    local autopairs = require("nvim-autopairs")
+
+    -- configure autopairs
+    autopairs.setup({
+      check_ts = true, -- enable treesitter
+      ts_config = {
+        lua = { "string" }, -- don't add pairs in lua string treesitter nodes
+        javascript = { "template_string" }, -- don't add pairs in javscript template_string treesitter nodes
+        java = false, -- don't check treesitter on java
+      },
+    })
+
+    -- import nvim-autopairs completion functionality
+    local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+
+    -- import nvim-cmp plugin (completions plugin)
+    local cmp = require("cmp")
+
+    -- make autopairs and completion work together
+    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+  end,
+}
+
+<./lua/azam/plugins/comment.lua>
+return {
+  "numToStr/Comment.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+  },
+  config = function()
+    -- import comment plugin safely
+    local comment = require("Comment")
+
+    local ts_context_commentstring = require("ts_context_commentstring.integrations.comment_nvim")
+
+    -- enable comment
+    comment.setup({
+      -- for commenting tsx, jsx, svelte, html files
+      pre_hook = ts_context_commentstring.create_pre_hook(),
+    })
+  end,
+}
+
+<./lua/azam/plugins/alpha.lua>
+return {
+  "goolord/alpha-nvim",
+  event = "VimEnter",
+  config = function()
+    local alpha = require("alpha")
+    local dashboard = require("alpha.themes.dashboard")
+
+    -- Set header with custom ASCII art
+    dashboard.section.header.val = {
+      "                   █████╗ ███████╗ █████╗ ███╗   ███╗",
+      "                  ██╔══██╗╚══███╔╝██╔══██╗████╗ ████║",
+      "                  ███████║  ███╔╝ ███████║██╔████╔██║",
+      "                  ██╔══██║ ███╔╝  ██╔══██║██║╚██╔╝██║",
+      "                  ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║",
+      "                  ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝",
+      "▓▓▓                                                                     ▓▓▓",
+      " ▒▓█████████████████████▒          ▒   ▒          ██████████████████████▓▒ ",
+      "    ▒████████████████████▓         █   ▓         ████████████████████▓▒    ",
+      "      ▓████████████████████▓       █████       ▓████████████████████▓      ",
+      "       ▒██████████████████████████████████████████████████████████         ",
+      "        ▒████████████████████████████████████████████████████████          ",
+      "         ▒██████████████████████████████████████████████████████▓          ",
+      "            ▒▒██████████████████████████████████████████████▒▒             ",
+      "                  ▒▒▒▒▒▓▓█████████████████████████▓▓▒▒▒▒▒                  ",
+      "                            ▒▓██████████████▓▒                             ",
+      "                                ▓████████▓▒                                ",
+      "                                  ▓████▓                                   ",
+      "                                   ▒██▒                                    ",
+      "                                    ▒▒                                     ",
+    }
+
+    -- Set menu
+    dashboard.section.buttons.val = {
+      dashboard.button("e", "  > New File", "<cmd>ene<CR>"),
+      dashboard.button("SPC ee", "  > Toggle file explorer", "<cmd>NvimTreeToggle<CR>"),
+      dashboard.button("SPC ff", "󰱼 > Find File", "<cmd>Telescope find_files<CR>"),
+      dashboard.button("SPC fs", "  > Find Word", "<cmd>Telescope live_grep<CR>"),
+      dashboard.button("SPC wr", "󰁯  > Restore Session For Current Directory", "<cmd>SessionRestore<CR>"),
+      dashboard.button("q", " > Quit NVIM", "<cmd>qa<CR>"),
+    }
+
+    -- Send config to alpha
+    alpha.setup(dashboard.opts)
+
+    -- Disable folding on alpha buffer
+    vim.cmd([[autocmd FileType alpha setlocal nofoldenable]])
+  end,
+}
+
+
+<./lua/azam/plugins/substitute.lua>
+return {
+  "gbprod/substitute.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local substitute = require("substitute")
+
+    substitute.setup()
+
+    -- set keymaps
+    local keymap = vim.keymap -- for conciseness
+
+    vim.keymap.set("n", "s", substitute.operator, { desc = "Substitute with motion" })
+    vim.keymap.set("n", "ss", substitute.line, { desc = "Substitute line" })
+    vim.keymap.set("n", "S", substitute.eol, { desc = "Substitute to end of line" })
+    vim.keymap.set("x", "s", substitute.visual, { desc = "Substitute in visual mode" })
+  end,
+}
+
+<./lua/azam/plugins/nvim-surround.lua>
+return {
+  "kylechui/nvim-surround",
+  event = { "BufReadPre", "BufNewFile" },
+  version = "*", -- Use for stability; omit to use `main` branch for the latest features
+  config = true,
+}
+
+<./lua/azam/plugins/treesitter.lua>
+return {
+  "nvim-treesitter/nvim-treesitter",
+  event = { "BufReadPre", "BufNewFile" },
+  build = ":TSUpdate",
+  config = function()
+    local treesitter = require("nvim-treesitter.configs")
+    treesitter.setup({
+      highlight = {
+        enable = true,
+      },
+      indent = { enable = true },
+      ensure_installed = {
+        "json",
+        "javascript",
+        "typescript",
+        "tsx",
+        "yaml",
+        "html",
+        "css",
+        "prisma",
+        "markdown",
+        "markdown_inline",
+        "svelte",
+        "graphql",
+        "bash",
+        "lua",
+        "vim",
+        "dockerfile",
+        "gitignore",
+        "query",
+        "vimdoc",
+        "c",
+        "java", -- Added for Java
+        "python", -- Explicitly added for Python
+      },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<C-space>",
+          node_incremental = "<C-space>",
+          scope_incremental = false,
+          node_decremental = "<bs>",
+        },
+      },
+    })
+  end,
+}
+
+<./lua/azam/plugins/telescope.lua>
+return {
+  "nvim-telescope/telescope.nvim",
+  branch = "0.1.x",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    "nvim-tree/nvim-web-devicons",
+    "folke/todo-comments.nvim",
+  },
+  config = function()
+    local telescope = require("telescope")
+    local actions = require("telescope.actions")
+
+    telescope.setup({
+      defaults = {
+        path_display = { "smart" },
+        mappings = {
+          i = {
+            ["<C-k>"] = actions.move_selection_previous, -- move to prev result
+            ["<C-j>"] = actions.move_selection_next, -- move to next result
+            ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+          },
+        },
+      },
+    })
+
+    telescope.load_extension("fzf")
+
+    -- set keymaps
+    local keymap = vim.keymap -- for conciseness
+
+    keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
+    keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
+    keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+    keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+    keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
+  end,
+}
+
+<./lua/azam/plugins/linting.lua>
+return {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+        local lint = require("lint")
+
+        lint.linters_by_ft = {
+            javascript = { "eslint_d" },
+            typescript = { "eslint_d" },
+            javascriptreact = { "eslint_d" },
+            typescriptreact = { "eslint_d" },
+            svelte = { "eslint_d" },
+            python = { "pylint" },
+        }
+
+        local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
+
+        vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
+            group = lint_augroup,
+            callback = function()
+                lint.try_lint()
+            end,
+        })
+
+        vim.keymap.set("n", "<leader>l", function()
+            lint.try_lint()
+        end, { desc = "Trigger linting for current file" })
+    end,
+}
+
+<./lua/azam/plugins/iron.lua>
+return {
+  {
+    "Vigemus/iron.nvim",
+    event = { "BufReadPre *.py,*.ipynb", "BufNewFile *.py,*.ipynb" },
+    config = function()
+      local iron = require("iron.core")
+      local view = require("iron.view")
+      local common = require("iron.fts.common")
+
+      iron.setup({
+        config = {
+          scratch_repl = true,
+          repl_definition = {
+            python = {
+              command = { "ipython", "--no-autoindent" },
+              format = common.bracketed_paste_python,
+              block_dividers = { "# %%", "#%%" },               -- Recognize # %% as cell markers
+            },
+          },
+          repl_open_cmd = view.split.vertical.botright(40),           -- Same as view.bottom(40) but vertical
+          highlight = {
+            italic = true,
+            bold = true,
+            fg = vim.api.nvim_get_hl_by_name("Normal", true).foreground,
+            bg = vim.api.nvim_get_hl_by_name("NormalFloat", true).background,
+          },
+          ignore_blank_lines = true,
+        },
+        keymaps = {
+          toggle_repl = "<leader>mr",                        -- Open/close REPL (was <space>rr)
+          restart_repl = "<leader>mn",                       -- Restart REPL (was <space>rR)
+          send_motion = "<leader>ms",                        -- Send motion (was <space>sc)
+          visual_send = "<leader>mv",                        -- Send visual selection (was <space>sc)
+          send_file = "<leader>mf",                          -- Send file (was <space>sf)
+          send_line = "<leader>ml",                          -- Send line (was <space>sl)
+          send_paragraph = "<leader>mg",                     -- Send paragraph (was <space>sp, avoided <leader>mp)
+          send_until_cursor = "<leader>mu",                  -- Send until cursor (was <space>su)
+          send_mark = "<leader>mm",                          -- Send mark (was <space>sm)
+          send_code_block = "<leader>me",                    -- Send code block (was <space>sb, now used for cells)
+          send_code_block_and_move = "<leader>mB",           -- Send code block and move (was <space>sn)
+          mark_motion = "<leader>mdm",                       -- Mark motion (was <space>mc)
+          mark_visual = "<leader>mdv",                       -- Mark visual (was <space>mc)
+          remove_mark = "<leader>mdr",                       -- Remove mark (was <space>md)
+          cr = "<leader>mc",                                 -- Send CR (was <space>s<cr>)
+          interrupt = "<leader>mi",                          -- Interrupt (was <space>s<space>)
+          exit = "<leader>mq",                               -- Exit REPL (was <space>sq)
+          clear = "<leader>mx",                              -- Clear REPL (was <space>cl)
+        },
+      })
+
+      -- Additional commands from the documentation
+      vim.keymap.set("n", "<leader>mfp", "<cmd>IronFocus<CR>", { noremap = true, silent = true })       -- Focus REPL (was <space>rf)
+      vim.keymap.set("n", "<leader>mh", "<cmd>IronHide<CR>", { noremap = true, silent = true })         -- Hide REPL (was <space>rh)
+
+      -- Visual mode mappings (must be set manually since keymaps table applies to normal mode)
+      vim.keymap.set("v", "<leader>mv", "<cmd>IronSend<CR>", { noremap = true, silent = true })              -- Visual send
+      vim.keymap.set("v", "<leader>mdv", "<cmd>IronMarkVisual<CR>", { noremap = true, silent = true })       -- Mark visual
+
+      vim.notify("iron.nvim loaded and configured", vim.log.levels.INFO)
+    end,
+  },
+}
+
+<./lua/azam/plugins/formatting.lua>
+return {
+  "stevearc/conform.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  config = function()
+    local conform = require("conform")
+
+    conform.setup({
+      formatters_by_ft = {
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescriptreact = { "prettier" },
+        svelte = { "prettier" },
+        css = { "prettier" },
+        html = { "prettier" },
+        json = { "prettier" },
+        yaml = { "prettier" },
+        markdown = { "prettier" },
+        graphql = { "prettier" },
+        liquid = { "prettier" },
+        python = { "isort", "black" },
+      },
+      format_on_save = {
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 1000,
+      },
+      formatters = {
+        prettier = {
+          prepend_args = { "--tab-width", "2", "--use-tabs", "false" },
+        },
+
+      },
+    })
+
+    vim.keymap.set({ "n", "v" }, "<leader>mp", function()
+      conform.format({
+        lsp_fallback = true,
+        async = false,
+        timeout_ms = 500,
+      })
+    end, { desc = "Format file or range (in visual mode)" })
+  end,
+}
+
+<./lua/azam/plugins/lsp/mason.lua>
+return {
+  {
+    "williamboman/mason.nvim",
+    version = "1.11.0",
+    dependencies = {
+      {
+        "williamboman/mason-lspconfig.nvim",
+        version = "1.11.0",
+      },
+      "WhoIsSethDaniel/mason-tool-installer.nvim",
+    },
+    cmd = "Mason",
+    config = function()
+      require("mason").setup()
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "html",
+          "cssls",
+          "tailwindcss",
+          "lua_ls",
+          "graphql",
+          "pyright",
+          "jdtls", -- Added for Java
+        },
+        automatic_installation = true,
+      })
+      require("mason-tool-installer").setup({
+        ensure_installed = {
+          "prettier",
+          "isort",
+          "black",
+          "pylint",
+          "eslint_d",
+          "debugpy", -- Ensure debugpy for Python debugging
+        },
+        auto_update = true,
+        run_on_start = true,
+      })
+    end,
+  },
+}
+
+<./lua/azam/plugins/lsp/lspconfig.lua>
+return {
+  "neovim/nvim-lspconfig",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = {
+    "hrsh7th/cmp-nvim-lsp",
+    { "antosha417/nvim-lsp-file-operations", config = true },
+    { "folke/neodev.nvim", opts = {} },
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+  },
+  config = function()
+    local lspconfig = require("lspconfig")
+    local cmp_nvim_lsp = require("cmp_nvim_lsp")
+
+    -- Enable LSP capabilities for nvim-cmp
+    local capabilities = cmp_nvim_lsp.default_capabilities()
+
+    -- Configure language servers
+    local servers = {
+      lua_ls = {
+        settings = {
+          Lua = {
+            diagnostics = { globals = { "vim" } },
+            workspace = { checkThirdParty = false },
+            telemetry = { enable = false },
+          },
+        },
+      },
+      cssls = {}, -- CSS Language Server
+      html = {}, -- HTML Language Server
+      tailwindcss = {}, -- Tailwind CSS
+      pyright = {}, -- Python
+      graphql = {}, -- GraphQL
+      jdtls = {}, -- Java (requires additional setup for complex projects)
+    }
+
+    for server, config in pairs(servers) do
+      lspconfig[server].setup(vim.tbl_deep_extend("force", {
+        capabilities = capabilities,
+      }, config))
+    end
+
+    -- LSP keybindings
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+      callback = function(ev)
+        local opts = { buffer = ev.buf, silent = true }
+
+        opts.desc = "Show LSP references"
+        vim.keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts)
+
+        opts.desc = "Go to declaration"
+        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+
+        opts.desc = "Show LSP definitions"
+        vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
+
+        opts.desc = "Show LSP implementations"
+        vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
+
+        opts.desc = "Show LSP type definitions"
+        vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
+
+        opts.desc = "See available code actions"
+        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+
+        opts.desc = "Smart rename"
+        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+
+        opts.desc = "Show buffer diagnostics"
+        vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
+
+        opts.desc = "Show line diagnostics"
+        vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
+
+        opts.desc = "Go to previous diagnostic"
+        vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+
+        opts.desc = "Go to next diagnostic"
+        vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+
+        opts.desc = "Show documentation for what is under cursor"
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+
+        opts.desc = "Restart LSP"
+        vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
+      end,
+    })
+
+    -- Diagnostic signs
+    local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+    for type, icon in pairs(signs) do
+      local hl = "DiagnosticSign" .. type
+      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+    end
+  end,
+}
+
+<./lua/azam/plugins/dap.lua>
+return {
+    {
+        "mfussenegger/nvim-dap",
+        dependencies = {
+            "rcarriga/nvim-dap-ui",
+            "mfussenegger/nvim-dap-python",
+            "nvim-neotest/nvim-nio",
+        },
+        config = function()
+            local dap = require("dap")
+            local dapui = require("dapui")
+
+            -- Setup DAP UI
+            dapui.setup({
+                layouts = {
+                    {
+                        elements = {
+                            { id = "scopes",      size = 0.25 },
+                            { id = "breakpoints", size = 0.25 },
+                            { id = "stacks",      size = 0.25 },
+                            { id = "watches",     size = 0.25 },
+                        },
+                        size = 40,
+                        position = "left",
+                    },
+                    {
+                        elements = { "repl", "console" },
+                        size = 10,
+                        position = "bottom",
+                    },
+                },
+            })
+
+            -- Automatically open/close DAP UI
+            dap.listeners.after.event_initialized["dapui_config"] = function()
+                dapui.open()
+            end
+            dap.listeners.before.event_terminated["dapui_config"] = function()
+                dapui.close()
+            end
+            dap.listeners.before.event_exited["dapui_config"] = function()
+                dapui.close()
+            end
+
+            -- Python DAP configuration
+            require("dap-python").setup("~/.venv/nvim-tools/bin/python") -- Path to your virtualenv python
+
+            -- Ensure debugpy is installed in your virtualenv
+            -- Run: pip install debugpy (if not already installed)
+
+            -- Apply theme from coloursscheme.lua (assumes a colorscheme like catppuccin or similar)
+            vim.api.nvim_set_hl(0, "DapBreakpoint", { link = "DiagnosticError" }) -- Red breakpoint icon
+            vim.api.nvim_set_hl(0, "DapStopped", { link = "DiagnosticWarn" }) -- Yellow for current line
+            vim.api.nvim_set_hl(0, "DapLogPoint", { link = "DiagnosticInfo" }) -- Blue for log points
+
+            -- Sign definitions for DAP
+            vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "DapBreakpoint", linehl = "", numhl = "" })
+            vim.fn.sign_define("DapStopped", { text = "➡️", texthl = "DapStopped", linehl = "DapStopped", numhl = "" })
+            vim.fn.sign_define("DapLogPoint", { text = "📝", texthl = "DapLogPoint", linehl = "", numhl = "" })
+
+            -- Which-key integration
+                        -- Which-key integration
+            local wk = require("which-key")
+            wk.add({
+              { "<leader>d", group = "debug" },
+              { "<leader>db", dap.toggle_breakpoint, desc = "Toggle Breakpoint" },
+              { "<leader>dc", dap.continue, desc = "Continue" },
+              { "<leader>di", dap.step_into, desc = "Step Into" },
+              { "<leader>do", dap.step_over, desc = "Step Over" },
+              { "<leader>du", dap.step_out, desc = "Step Out" },
+              { "<leader>dr", dapui.toggle, desc = "Toggle DAP UI" },
+              { "<leader>dt", dap.terminate, desc = "Terminate" },
+            })
+        end,
+    },
+}
+
+<./lua/azam/plugins/gitsigns.lua>
+return {
+  "lewis6991/gitsigns.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  opts = {
+    -- Enables virtual text blame for the current line
+    current_line_blame = true,
+
+    -- Options for how the blame text should appear
+    current_line_blame_opts = {
+      delay = 100,               -- Delay in milliseconds before blame text appears
+      virt_text = true,          -- Display blame info as virtual text (inline)
+      virt_text_pos = 'eol',     -- Position the text at the end of the line ('eol' = end of line)
+      ignore_whitespace = false, -- Don't ignore whitespace when determining blame
+    },
+
+    -- Format of the blame text shown
+    current_line_blame_formatter = '<author>, <author_time:%Y-%m-%d> - <summary>',
+    -- Shows: Author name, date, and short commit message
+    on_attach = function(bufnr)
+      local gs = package.loaded.gitsigns
+
+      local function map(mode, l, r, desc)
+        vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
+      end
+
+      -- Navigation
+      map("n", "]h", gs.next_hunk, "Next Hunk")
+      map("n", "[h", gs.prev_hunk, "Prev Hunk")
+
+      -- Actions
+      map("n", "<leader>hs", gs.stage_hunk, "Stage hunk")
+      map("n", "<leader>hr", gs.reset_hunk, "Reset hunk")
+      map("v", "<leader>hs", function()
+        gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+      end, "Stage hunk")
+      map("v", "<leader>hr", function()
+        gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+      end, "Reset hunk")
+
+      map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
+      map("n", "<leader>hR", gs.reset_buffer, "Reset buffer")
+
+      map("n", "<leader>hu", gs.undo_stage_hunk, "Undo stage hunk")
+
+      map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
+
+      map("n", "<leader>hb", function()
+        gs.blame_line({ full = true })
+      end, "Blame line")
+      map("n", "<leader>hB", gs.toggle_current_line_blame, "Toggle line blame")
+
+      map("n", "<leader>hd", gs.diffthis, "Diff this")
+      map("n", "<leader>hD", function()
+        gs.diffthis("~")
+      end, "Diff this ~")
+
+      -- Text object
+      map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "Gitsigns select hunk")
+    end,
+  },
+}
+
+<./lua/azam/plugins/dressing.lua>
+return {
+  "stevearc/dressing.nvim",
+  event = "VeryLazy",
+}
+
+<./lua/azam/plugins/todo-comment.lua>
+return {
+  "folke/todo-comments.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = { "nvim-lua/plenary.nvim" },
+  config = function()
+    local todo_comments = require("todo-comments")
+
+    -- set keymaps
+    local keymap = vim.keymap -- for conciseness
+
+    keymap.set("n", "]t", function()
+      todo_comments.jump_next()
+    end, { desc = "Next todo comment" })
+
+    keymap.set("n", "[t", function()
+      todo_comments.jump_prev()
+    end, { desc = "Previous todo comment" })
+
+    todo_comments.setup()
+  end,
+}
+
+<./lua/azam/plugins/auto-tag.lua>
+return {
+  "windwp/nvim-ts-autotag",
+  config = function()
+    require("nvim-ts-autotag").setup()
+  end,
+}
+
+
+<./lua/azam/plugins/nvim-tree.lua>
+return {
+  "nvim-tree/nvim-tree.lua",
+  dependencies = "nvim-tree/nvim-web-devicons",
+  config = function()
+    local nvimtree = require("nvim-tree")
+
+    -- recommended settings from nvim-tree documentation
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
+    nvimtree.setup({
+      view = {
+        width = 35,
+        relativenumber = true,
+      },
+      -- change folder arrow icons
+      renderer = {
+        indent_markers = {
+          enable = true,
+        },
+        icons = {
+          glyphs = {
+            folder = {
+              arrow_closed = "", -- arrow when folder is closed
+              arrow_open = "", -- arrow when folder is open
+            },
+          },
+        },
+      },
+      -- disable window_picker for
+      -- explorer to work well with
+      -- window splits
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false,
+          },
+        },
+      },
+      filters = {
+        custom = { ".DS_Store" },
+      },
+      git = {
+        ignore = false,
+      },
+    })
+
+    -- set keymaps
+    local keymap = vim.keymap -- for conciseness
+
+    keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
+    keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
+    keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
+    keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
+  end
+}
+
+
+<./lua/azam/plugins/lazygit.lua>
+return {
+  "kdheepak/lazygit.nvim",
+  cmd = {
+    "LazyGit",
+    "LazyGitConfig",
+    "LazyGitCurrentFile",
+    "LazyGitFilter",
+    "LazyGitFilterCurrentFile",
+  },
+  -- optional for floating window border decoration
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+  },
+  -- setting the keybinding for LazyGit with 'keys' is recommended in
+  -- order to load the plugin when the command is run for the first time
+  keys = {
+    { "<leader>lg", "<cmd>LazyGit<cr>", desc = "Open lazy git" },
+  },
+}
+
+<./lua/azam/plugins/indent-blankline.lua>
+return {
+  "lukas-reineke/indent-blankline.nvim",
+  event = { "BufReadPre", "BufNewFile" },
+  main = "ibl",
+  opts = {
+    indent = { char = "┊" },
+  },
+}
+
+<./lua/azam/plugins/trouble.lua>
+return {
+  "folke/trouble.nvim",
+  dependencies = { "nvim-tree/nvim-web-devicons", "folke/todo-comments.nvim" },
+  opts = {
+    focus = true,
+  },
+  cmd = "Trouble",
+  keys = {
+    { "<leader>xw", "<cmd>Trouble diagnostics toggle<CR>", desc = "Open trouble workspace diagnostics" },
+    { "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", desc = "Open trouble document diagnostics" },
+    { "<leader>xq", "<cmd>Trouble quickfix toggle<CR>", desc = "Open trouble quickfix list" },
+    { "<leader>xl", "<cmd>Trouble loclist toggle<CR>", desc = "Open trouble location list" },
+    { "<leader>xt", "<cmd>Trouble todo toggle<CR>", desc = "Open todos in trouble" },
+  },
+}
+
+<./lua/azam/plugins/coloursscheme.lua>
+return {
+  {
+    "folke/tokyonight.nvim",
+    priority = 1000, -- make sure to load this before all the other start plugins
+    config = function()
+      -- Define custom colors
+      local bg = "#011628"
+      local bg_dark = "#011423"
+      local bg_highlight = "#143652"
+      local bg_search = "#0A64AC"
+      local bg_visual = "#275378"
+      local fg = "#CBE0F0"
+      local fg_dark = "#B4D0E9"
+      local fg_gutter = "#627E97"
+      local border = "#547998"
+
+      -- Configure tokyo night theme with custom colors
+      require("tokyonight").setup({
+        style = "night",  -- You can switch between "night" or "day"
+        transparent = true,  -- Enable transparency in the background
+        on_colors = function(colors)
+          -- Set custom background and foreground colors
+          colors.bg = bg
+          colors.bg_dark = bg_dark
+          colors.bg_float = bg_dark
+          colors.bg_highlight = bg_highlight
+          colors.bg_popup = bg_dark
+          colors.bg_search = bg_search
+          colors.bg_sidebar = bg_dark
+          colors.bg_statusline = bg_dark
+          colors.bg_visual = bg_visual
+          colors.border = border
+          colors.fg = fg
+          colors.fg_dark = fg_dark
+          colors.fg_float = fg
+          colors.fg_gutter = fg_gutter
+          colors.fg_sidebar = fg_dark
+
+          -- Set transparent backgrounds where necessary
+          colors.bg = "none"  -- Make the normal background transparent
+          colors.bg_dark = "none"  -- Make the dark background transparent
+          colors.bg_float = "none"  -- Make the floating window background transparent
+          colors.bg_highlight = "none"  -- Make highlighted backgrounds transparent
+          colors.bg_sidebar = "none"  -- Make sidebar transparent
+          colors.bg_statusline = "none"  -- Make statusline background transparent
+        end,
+      })
+
+      -- Load the theme
+      vim.cmd([[colorscheme tokyonight]])
+    end,
+  },
+}
+
+
+<./lua/azam/plugins/nvim-cmp.lua>
+return {
+  "hrsh7th/nvim-cmp",
+  event = "InsertEnter",
+  dependencies = {
+    "hrsh7th/cmp-buffer", -- source for text in buffer
+    "hrsh7th/cmp-path", -- source for file system paths
+    "hrsh7th/cmp-nvim-lsp", -- source for LSP
+    {
+      "L3MON4D3/LuaSnip",
+      version = "v2.*",
+      build = "make install_jsregexp",
+    },
+    "saadparwaiz1/cmp_luasnip", -- for autocompletion
+    "rafamadriz/friendly-snippets", -- useful snippets
+    "onsails/lspkind.nvim", -- vs-code like pictograms
+  },
+  config = function()
+    local cmp = require("cmp")
+    local luasnip = require("luasnip")
+    local lspkind = require("lspkind")
+
+    -- Load vscode-style snippets
+    require("luasnip.loaders.from_vscode").lazy_load()
+
+    cmp.setup({
+      completion = {
+        completeopt = "menu,menuone,preview,noselect",
+      },
+      snippet = {
+        expand = function(args)
+          luasnip.lsp_expand(args.body)
+        end,
+      },
+      mapping = cmp.mapping.preset.insert({
+        ["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
+        ["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
+        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+        ["<C-f>"] = cmp.mapping.scroll_docs(4),
+        ["<C-Space>"] = cmp.mapping.complete(), -- trigger completion
+        ["<C-e>"] = cmp.mapping.abort(), -- close completion window
+        ["<CR>"] = cmp.mapping.confirm({ select = false }),
+      }),
+      -- Sources for autocompletion
+      sources = cmp.config.sources({
+        { name = "nvim_lsp" }, -- LSP suggestions
+        { name = "luasnip" }, -- snippets
+        { name = "buffer" }, -- text within current buffer
+        { name = "path" }, -- file system paths
+      }),
+      -- Configure lspkind for pictograms
+      formatting = {
+        format = lspkind.cmp_format({
+          mode = "symbol_text",
+          maxwidth = 50,
+          ellipsis_char = "...",
+        }),
+      },
+    })
+  end,
+}
+
+<./lua/azam/plugins/vim-maximizer.lua>
+return {
+  "szw/vim-maximizer",
+  keys = {
+    { "<leader>sm", "<cmd>MaximizerToggle<CR>", desc = "Maximize/minimize a split" },
+  },
+}
+
+<./lua/azam/plugins/init.lua>
+--contains plugins that donot require much configurations
+return {
+  "nvim-lua/plenary.nvim", -- lua functions that many plugins use a theme for telescope
+  "christoomey/vim-tmux-navigator", -- tmux & split window navigation
+}
+
+<./lua/azam/core/options.lua>
+vim.cmd("let g:netrw_liststyle = 3")
+local opt = vim.opt -- for conciseness
+
+-- line numbers
+opt.relativenumber = true -- show relative line numbers
+opt.number = true         -- shows absolute line number on cursor line (when relative number is on)
+
+-- tabs & indentation
+opt.tabstop = 2       -- 2 spaces for tabs (prettier default)
+opt.shiftwidth = 2    -- 2 spaces for indent width
+opt.expandtab = true  -- expand tab to spaces
+opt.autoindent = true -- copy indent from current line when starting new one
+
+-- line wrapping
+opt.wrap = false -- disable line wrapping
+
+-- search settings
+opt.ignorecase = true -- ignore case when searching
+opt.smartcase = true  -- if you include mixed case in your search, assumes you want case-sensitive
+
+-- cursor line
+opt.cursorline = true -- highlight the current cursor line
+
+-- appearance
+
+-- turn on termguicolors for nightfly colorscheme to work
+-- (have to use iterm2 or any other true color terminal)
+opt.termguicolors = true
+opt.background = "dark" -- colorschemes that can be light or dark will be made dark
+opt.signcolumn = "yes"  -- show sign column so that text doesn't shift
+
+-- backspace
+opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
+
+-- clipboard
+opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+vim.o.clipboard = "unnamedplus"
+-- split windows
+opt.splitright = true    -- split vertical window to the right
+opt.splitbelow = true    -- split horizontal window to the bottom
+vim.opt.updatetime = 250 -- default is 4000ms, so this is much faster
+-- turn off swapfile
+opt.swapfile = false
+opt.swapfile = false
+
+vim.g.python3_host_prog = "~/.venv/nvim-tools/bin/python"
+
+<./lua/azam/core/keymaps.lua>
+-- set leader key to space
+vim.g.mapleader = " "
+
+local keymap = vim.keymap -- for conciseness
+
+---------------------
+-- General Keymaps -------------------
+
+-- use jk to exit insert mode
+keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
+
+-- clear search highlights
+keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+
+-- delete single character without copying into register
+-- keymap.set("n", "x", '"_x')
+
+-- increment/decrement numbers
+keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
+keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
+
+-- window management
+keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })                   -- split window vertically
+keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })                 -- split window horizontally
+keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })                    -- make split windows equal width & height
+keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })               -- close current split window
+
+keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })                     -- open new tab
+keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })              -- close current tab
+keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })                     --  go to next tab
+keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })                 --  go to previous tab
+keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+-- Jupyter Notebook conversions
+vim.api.nvim_create_user_command('ConvertToPy', function()
+  local notebook = vim.fn.expand('%:p')
+  local script = notebook:gsub('%.ipynb$', '.py')
+  vim.fn.system({ 'jupyter', 'nbconvert', '--to', 'script', notebook })
+  vim.cmd('edit ' .. script)
+end, { desc = "Convert .ipynb to .py" })
+
+vim.api.nvim_create_user_command('ConvertToNb', function()
+  local script = vim.fn.expand('%:p')
+  local notebook = script:gsub('%.py$', '.ipynb')
+  vim.fn.system({ 'jupytext', '--to', 'notebook', script })
+  vim.cmd('edit ' .. notebook)
+end, { desc = "Convert .py to .ipynb" })
+
+-- Keybindings for conversions
+keymap.set("n", "<leader>cp", ":ConvertToPy<CR>", { desc = "Convert .ipynb to .py" })
+keymap.set("n", "<leader>cn", ":ConvertToNb<CR>", { desc = "Convert .py to .ipynb" })
+
+<./lua/azam/core/init.lua>
+require("azam.core.options")
+require("azam.core.keymaps")
+vim.diagnostic.config({
+  virtual_text = true, -- show inline error text
+  signs = true,        -- show signs in sign column
+  underline = true,    -- underline problematic code
+  update_in_insert = false,
+  severity_sort = true,
+})
+-- Show floating diagnostic window on cursor hover (like VS Code)
+vim.api.nvim_create_autocmd("CursorHold", {
+  callback = function()
+    vim.diagnostic.open_float(nil, { focus = false })
+  end,
+})
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.ipynb",
+  callback = function()
+    vim.bo.filetype = "python"
+  end,
+})
+
+<./init.lua>
+require("azam.core")
+require("azam.lazy")
+

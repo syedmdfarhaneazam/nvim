@@ -13,3 +13,9 @@ vim.api.nvim_create_autocmd("CursorHold", {
     vim.diagnostic.open_float(nil, { focus = false })
   end,
 })
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.ipynb",
+  callback = function()
+    vim.bo.filetype = "python"
+  end,
+})
